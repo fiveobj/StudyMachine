@@ -24,7 +24,7 @@ public class okhttpClass {
 //------------------------------post------------------------------------------------------------
 // ------------------------------get------------------------------------------------------------
 public String getViodeType(){
-    Request.Builder builder=new Request.Builder().url("http://192.168.31.95:8080/video/getVideoType");
+    Request.Builder builder=new Request.Builder().url("http://192.168.31.95:8080/video/getVideoTypeBySId?sID=1");
     builder.method("GET",null);
 
     Request request=builder.build();

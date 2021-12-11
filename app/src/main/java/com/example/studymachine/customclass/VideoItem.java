@@ -1,13 +1,22 @@
 package com.example.studymachine.customclass;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 
+import com.example.studymachine.R;
+import com.example.studymachine.tool.SerializableBitmap;
+
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class VideoItem {
-    private String name,intro;
+public class VideoItem implements Parcelable {
+
+    private String intro;
+    private String name;
     private Bitmap image;
     private String url;
     private String status;
@@ -23,6 +32,7 @@ public class VideoItem {
         this.status=status;
         image=getBitmapFormUrl(url);
     }
+
 
     public String getIntro() {
         return intro;
@@ -44,6 +54,13 @@ public class VideoItem {
         this.url = url;
     }
 
+    public void setImage(Bitmap image) {
+        this.image = image;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getUrl() {
         return url;
@@ -73,4 +90,51 @@ public class VideoItem {
         }
         return bitmap;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        //dest.writeString(this.intro);
+        dest.writeString(this.name);
+        //dest.writeParcelable(this.image, flags);
+        dest.writeString(this.url);
+        dest.writeString(this.status);
+    }
+
+    public void readFromParcel(Parcel source) {
+        //this.intro = source.readString();
+        this.name = source.readString();
+        //this.image = source.readParcelable(Bitmap.class.getClassLoader());
+        this.url = source.readString();
+        this.status = source.readString();
+    }
+
+    protected VideoItem(Parcel in) {
+        //this.intro = in.readString();
+        this.name = in.readString();
+        //this.image = in.readParcelable(Bitmap.class.getClassLoader());
+        this.url = in.readString();
+        this.status = in.readString();
+    }
+
+    public static final Parcelable.Creator<VideoItem> CREATOR = new Parcelable.Creator<VideoItem>() {
+        @Override
+        public VideoItem createFromParcel(Parcel source) {
+            VideoItem videoItem=new VideoItem();
+            videoItem.name=source.readString();
+            videoItem.url=source.readString();
+            videoItem.status=source.readString();
+            return videoItem;
+        }
+
+        @Override
+        public VideoItem[] newArray(int size) {
+            return new VideoItem[size];
+        }
+    };
 }

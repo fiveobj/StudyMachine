@@ -9,18 +9,22 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 
 import com.example.studymachine.adapter.VideoPlayerAdapter;
 import com.example.studymachine.customclass.ScrollCalculatorHelper;
+import com.example.studymachine.customclass.VideoItem;
 import com.example.studymachine.customclass.Video_Bean;
 import com.example.studymachine.tool.DpTools;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +33,8 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private RecyclerView videoPlayer_recyc;
     private final String mp4_a = "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4";//玩具总动员
     private final String mp4_b = "http://vfx.mtime.cn/Video/2019/03/13/mp4/190313094901111138.mp4";  //抓小偷
-    private List<Video_Bean> list;
+    private ArrayList<VideoItem> list;
+    private Intent intent=new Intent();
 
     //控制滚动播放
     ScrollCalculatorHelper scrollCalculatorHelper;
@@ -40,7 +45,11 @@ public class VideoPlayerActivity extends AppCompatActivity {
         setContentView(layout.activity_video_player);
         //StatusBarUtil.setColor(this, getResources().getColor(R.color.HaiPaiBlack));
 
-        initData();
+        Bundle bundle=this.getIntent().getExtras();
+        list=bundle.getParcelableArrayList("videobundle");
+        Log.d("videobundle",list.toString());
+
+        //initData();
         init();
 
     }
@@ -49,14 +58,14 @@ public class VideoPlayerActivity extends AppCompatActivity {
         list = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
 
-            Video_Bean video_bean = new Video_Bean();
+            VideoItem video_bean = new VideoItem();
             if (i % 2 == 0) {
                 video_bean.setUrl(mp4_a);
             } else {
                 video_bean.setUrl(mp4_b);
             }
-            video_bean.setBitmap(ContextCompat.getDrawable(this, mipmap.ic_launcher));
-            video_bean.setTitle("傀儡偶段のVideo  " + i);
+            //video_bean.setImage(ContextCompat.getDrawable(this, mipmap.ic_launcher));
+            video_bean.setName("傀儡偶段のVideo  " + i);
 
             list.add(video_bean);
         }
@@ -65,6 +74,10 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
 
     private void init() {
+
+
+
+
 
         videoPlayer_recyc = findViewById(id.video_player_recyc);
 
@@ -156,5 +169,8 @@ public class VideoPlayerActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
     }
 
-
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(new Bundle());
+    }
 }

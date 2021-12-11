@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +33,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private List<String> VideoName = new ArrayList<>();//视频类型
     private VideoNameAdapter NameAdapter;//视频类型适配器
     private VideoAdapter videoAdapter;
-    List<VideoItem> dataList = new ArrayList<>();//视频内容
+    ArrayList<VideoItem> dataList = new ArrayList<>();//视频内容
     private GridLayoutManager gridLayoutManager;
     private Context context;
     private String res;
@@ -58,7 +64,8 @@ public class MainActivity extends AppCompatActivity {
                 case 1:
                     //MainActivity.this.res=msg.obj.toString();
                     Log.d("handler", msg.obj.toString());
-                    videoAdapter = new VideoAdapter(context, (List<VideoItem>) msg.obj);
+
+                    videoAdapter = new VideoAdapter(context, (ArrayList<VideoItem>) msg.obj);
                     VideoList.setLayoutManager(gridLayoutManager);
                     VideoList.setAdapter(videoAdapter);
                     //handlerdata(msg.obj.toString());
@@ -237,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                     public String getData(String str) {
                         Log.d("getViode", str);
                         try {
-                            List<VideoItem> data=new ArrayList<>();
+                            ArrayList<VideoItem> data=new ArrayList<>();
                             JSONObject jsonObject=new JSONObject(str);
                             String data1=jsonObject.getString("data");
                             JSONArray jsonArray=new JSONArray(data1);
@@ -249,6 +256,8 @@ public class MainActivity extends AppCompatActivity {
                                     String title=jsonObject1.optString("title");
                                     String intro=jsonObject1.optString("introduce");
                                     String status=jsonObject1.optString("status");
+                                    String url_img=jsonObject1.optString("coverUrl");
+                                    //Bitmap image=getPicture(url_img);
                                     VideoItem videoItem=new VideoItem(title,intro,url,status);
                                     data.add(videoItem);
                                 }
@@ -322,6 +331,7 @@ public class MainActivity extends AppCompatActivity {
                     title = jsonObject1.optString("title");
                     intro = jsonObject1.optString("introduce");
                     status = jsonObject1.optString("status");
+
                     VideoItem videoItem = new VideoItem(title, intro, url, status);
                     dataList.add(videoItem);
                     Log.d("videoUrl", url);
@@ -334,6 +344,53 @@ public class MainActivity extends AppCompatActivity {
         VideoList.setLayoutManager(gridLayoutManager);
         VideoList.setAdapter(videoAdapter);
 
+
+    }
+
+
+    private void getPicture(String path){
+        new Thread(){
+            private HttpURLConnection conn;
+            private Bitmap bitmap;
+
+            @Override
+            public void run() {
+                try {
+                    //创建URL对象
+                    URL url=new URL(path);
+                    // 根据url 发送 http的请求
+                    conn=(HttpURLConnection) url.openConnection();
+                    // 设置请求的方式
+                    conn.setRequestMethod("GET");
+                    //设置超时时间
+                    conn.setConnectTimeout(5000);
+                    // 得到服务器返回的响应码
+                    int code = conn.getResponseCode();
+                    //请求网络成功后返回码是200
+                    if (code == 200) {
+                        //获取输入流
+                        InputStream is = conn.getInputStream();
+                        //将流转换成Bitmap对象
+                        bitmap = BitmapFactory.decodeStream(is);
+                        //将更改主界面的消息发送给主线程
+                        Message msg = new Message();
+                        msg.what = 2;
+                        msg.obj = bitmap;
+                        handler.sendMessage(msg);
+                    } else {
+                        //返回码不等于200 请求服务器失败
+                        //Message msg = new Message();
+                        //msg.what = 3;
+                        //handler.sendMessage(msg);
+                    }
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                conn.disconnect();
+            }
+        }.start();
 
     }
 }

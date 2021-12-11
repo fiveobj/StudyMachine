@@ -9,12 +9,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.studymachine.R;
+import com.example.studymachine.customclass.VideoItem;
 import com.example.studymachine.customclass.Video_Bean;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder;
 import com.shuyu.gsyvideoplayer.listener.GSYSampleCallBack;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,14 +24,14 @@ import java.util.Map;
 public class VideoPlayerAdapter  extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     private Context context;
-    private List<Video_Bean> list;
+    private ArrayList<VideoItem> list;
 
     public static final String TAG = "ListNormalAdapter22";
 
     private GSYVideoOptionBuilder gsyVideoOptionBuilder;
 
 
-    public VideoPlayerAdapter(Context context,List<Video_Bean> list) {
+    public VideoPlayerAdapter(Context context,ArrayList<VideoItem> list) {
         this.context = context;
         this.list = list;
 
@@ -52,7 +54,7 @@ public class VideoPlayerAdapter  extends RecyclerView.Adapter<RecyclerView.ViewH
         gsyVideoOptionBuilder
                 .setIsTouchWiget(false)
                 .setUrl(list.get(position).getUrl())
-                .setVideoTitle(list.get(position).getTitle())
+                .setVideoTitle(list.get(position).getName())
                 .setCacheWithPlay(false)
                 .setRotateViewAuto(false)
                 .setLockLand(true)
