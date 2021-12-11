@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -58,6 +59,8 @@ public class VideoNameAdapter extends BaseAdapter {
             LayoutInflater inflater = LayoutInflater.from(context);
             convertView = inflater.inflate(R.layout.videoname_item, null);
             viewHolder.itemTextView = (TextView) convertView.findViewById(R.id.Videoname_tv);
+            viewHolder.itemImage=(ImageView)convertView.findViewById(R.id.Videoname_im);
+
             //viewHolder.portalLinearLayout = (LinearLayout) convertView.findViewById(R.id.Videoname_ll);
             convertView.setTag(viewHolder);
         } else {
@@ -65,6 +68,12 @@ public class VideoNameAdapter extends BaseAdapter {
 
         }
         viewHolder.itemTextView.setText(list.get(position).get("name").toString());
+        if(list.get(position).get("payStatus").toString().equals("0")){
+            viewHolder.itemImage.setVisibility(View.VISIBLE);
+        }else
+        {
+            viewHolder.itemImage.setVisibility(View.GONE);
+        }
         if (selectItem == position) {
             viewHolder.itemTextView.setSelected(true);
             viewHolder.itemTextView.setPressed(true);
@@ -81,7 +90,7 @@ public class VideoNameAdapter extends BaseAdapter {
 
     private class ViewHolder {
         private TextView itemTextView;
-        private LinearLayout portalLinearLayout;
+        private ImageView itemImage;
     }
 
 }

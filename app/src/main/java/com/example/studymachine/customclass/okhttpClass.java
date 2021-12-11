@@ -1,5 +1,6 @@
 package com.example.studymachine.customclass;
 
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -75,12 +76,15 @@ public String getViodeType(){
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                Looper.prepare();
                 string=response.body().string();
                 mdata.getData(string);
+                Looper.loop();
                 //aBoolean=true;
 
             }
         });
+
         //str[0]=call.execute().body().string();
         //Log.d("issuccessful", issuccessful[0]==true?"true":"false");
 

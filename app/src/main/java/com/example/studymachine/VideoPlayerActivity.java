@@ -34,6 +34,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private final String mp4_a = "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4";//玩具总动员
     private final String mp4_b = "http://vfx.mtime.cn/Video/2019/03/13/mp4/190313094901111138.mp4";  //抓小偷
     private ArrayList<VideoItem> list;
+    private int onclickitem;
     private Intent intent=new Intent();
 
     //控制滚动播放
@@ -47,6 +48,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
         Bundle bundle=this.getIntent().getExtras();
         list=bundle.getParcelableArrayList("videobundle");
+        onclickitem=bundle.getByte("clickitem");
         Log.d("videobundle",list.toString());
 
         //initData();
@@ -106,6 +108,10 @@ public class VideoPlayerActivity extends AppCompatActivity {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+
+
+                newState=onclickitem;
+
 
                 //如果newState的状态==RecyclerView.SCROLL_STATE_IDLE;
                 //播放对应的视频

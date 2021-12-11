@@ -102,7 +102,7 @@ public class VideoPlayerAdapter  extends RecyclerView.Adapter<RecyclerView.ViewH
                 vh.standardGSYVideoPlayer.startWindowFullscreen(context, false, true);
             }
         });*/
-//实现第一个视频自动播放
+        //实现第一个视频自动播放
         if(position==0){
             vh.standardGSYVideoPlayer.startPlayLogic();
         }

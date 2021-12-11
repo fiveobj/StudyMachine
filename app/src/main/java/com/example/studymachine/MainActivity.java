@@ -9,10 +9,9 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
@@ -25,7 +24,6 @@ import com.example.studymachine.customclass.SpaceItemDecoration;
 import com.example.studymachine.customclass.VideoItem;
 import com.example.studymachine.customclass.okhttpClass;
 import com.example.studymachine.view.HorizonTalListView;
-import com.google.android.exoplayer2.C;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 
 import org.json.JSONArray;
@@ -36,26 +34,37 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingDeque;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
     private HorizonTalListView VideoNameList;//水平标题
     private RecyclerView VideoList;//长视频播放列表
     private List<String> VideoName = new ArrayList<>();//视频类型
+    private List<String> VideoNamePayStatus=new ArrayList<>();//是否支付
     private VideoNameAdapter NameAdapter;//视频类型适配器
     private VideoAdapter videoAdapter;
-    ArrayList<VideoItem> dataList = new ArrayList<>();//视频内容
+    private ArrayList<VideoItem> dataList = new ArrayList<>();//视频内容
+    private List<Map<String,Object>> datalist1=new ArrayList<>();
     private GridLayoutManager gridLayoutManager;
     private Context context;
     private String res;
     private String url,title,intro,status;
+
+
+    private Handler getPucturehandler;
+
+    private OkHttpClient client;
 
     private Handler handler = new Handler(new Handler.Callback() {
         @Override
@@ -64,11 +73,42 @@ public class MainActivity extends AppCompatActivity {
                 case 1:
                     //MainActivity.this.res=msg.obj.toString();
                     Log.d("handler", msg.obj.toString());
+                    dataList=(ArrayList<VideoItem>) msg.obj;
 
                     videoAdapter = new VideoAdapter(context, (ArrayList<VideoItem>) msg.obj);
                     VideoList.setLayoutManager(gridLayoutManager);
                     VideoList.setAdapter(videoAdapter);
                     //handlerdata(msg.obj.toString());
+
+                    /*datalist1=(List<Map<String, Object>>) msg.obj;
+                    Log.d("datalist1", datalist1.toString());
+                    for(int i=0;i<datalist1.size();i++){
+                        //getPicture(datalist1.get(i).get("url_img").toString());
+
+
+                    }*/
+                case 2:
+                    //text.setImageBitmap((Bitmap) msg.obj);
+                    //Log.d("getpicture-handler:", msg.obj.toString());
+
+
+
+            }
+            return false;
+        }
+
+    });
+
+    private Handler handler2=new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            switch (msg.what){
+                case 1:
+                    Map<String,Object> map=new HashMap<>();
+                    map.put("image",msg.obj);
+                    Log.d("getpicture-handler:", msg.obj.toString());
+
+
             }
             return false;
         }
@@ -118,6 +158,8 @@ public class MainActivity extends AppCompatActivity {
         videoAdapter = new VideoAdapter(context, dataList);
         VideoList.setLayoutManager(gridLayoutManager);
         VideoList.setAdapter(videoAdapter);
+
+
     }
 
     //视频类型
@@ -126,7 +168,8 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < VideoName.size(); i++) {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("name", VideoName.get(i));
-            Log.d("VideoName-", VideoName.toString());
+            map.put("payStatus",VideoNamePayStatus.get(i));
+            Log.d("VideoName+PayStatus-", VideoName.toString()+VideoNamePayStatus.toString());
             list.add(map);
         }
         return list;
@@ -192,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
                 String result = tools.getViodeType();
                 Log.d("getViodeType", result);
                 String name = null;
+                String payState=null;
                 try {
                     JSONObject jsonObject = new JSONObject(result);
                     String VideoNames = jsonObject.getString("data");
@@ -199,7 +243,10 @@ public class MainActivity extends AppCompatActivity {
                     for (int i = 0; i < VideoNamearrray.length(); i++) {
                         JSONObject videonameitem = VideoNamearrray.getJSONObject(i);
                         if (videonameitem != null) {
+
                             name = videonameitem.optString("typeName");
+                            payState=videonameitem.optString("payState");
+                            VideoNamePayStatus.add(payState);
                             VideoName.add(name);
                             Log.d("name", name);
                         }
@@ -237,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                Looper.prepare();
                 final String[] result = {null};
                 okhttpClass tools = new okhttpClass();
                 tools.setData(new okhttpClass.data() {
@@ -249,6 +297,7 @@ public class MainActivity extends AppCompatActivity {
                             String data1=jsonObject.getString("data");
                             JSONArray jsonArray=new JSONArray(data1);
                             Log.d("data1",jsonArray.toString());
+                            List<Map<String,Object>> list_map=new ArrayList<>();
                             for(int i=0;i<jsonArray.length();i++){
                                 JSONObject jsonObject1=jsonArray.getJSONObject(i);
                                 if(jsonObject1!=null){
@@ -257,14 +306,40 @@ public class MainActivity extends AppCompatActivity {
                                     String intro=jsonObject1.optString("introduce");
                                     String status=jsonObject1.optString("status");
                                     String url_img=jsonObject1.optString("coverUrl");
+                                    Map<String,Object> map=new HashMap<>();
+                                    map.put("url",url);
+                                    map.put("title",title);
+                                    map.put("intro",intro);
+                                    map.put("status",status);
+                                    map.put("url_img",url_img);
+                                    //asyncGet(url_img);
+                                    getPucturehandler=new Handler(new Handler.Callback() {
+                                        @Override
+                                        public boolean handleMessage(@NonNull Message msg) {
+                                            switch (msg.what)
+                                            {
+                                                case 12:
+                                                    byte[] bytes=(byte[])msg.obj;
+                                                    Bitmap bitmap=BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                                                    map.put("image",bitmap);
+                                                    Log.d("image_handler",msg.obj.toString());
+                                            }
+
+                                            return false;
+                                        }
+                                    });
                                     //Bitmap image=getPicture(url_img);
-                                    VideoItem videoItem=new VideoItem(title,intro,url,status);
+                                    //getPicture(url_img);
+                                    VideoItem videoItem=new VideoItem(title,intro,url,status,url_img);
                                     data.add(videoItem);
+                                    //Log.d("map+Bitmap",map.toString());
+                                    //list_map.add(map);
                                 }
                             }
                             Message message = new Message();
                             message.what = 1;
                             message.obj = data;
+                            //message.obj=list_map;
                             handler.sendMessage(message);
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -312,7 +387,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("play_rtsp2", e.toString());
                 }*/
 
-
+                Looper.loop();
             }
         }).start();
     }
@@ -332,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
                     intro = jsonObject1.optString("introduce");
                     status = jsonObject1.optString("status");
 
-                    VideoItem videoItem = new VideoItem(title, intro, url, status);
+                    VideoItem videoItem = new VideoItem(title, intro, url, status,"1");
                     dataList.add(videoItem);
                     Log.d("videoUrl", url);
                 }
@@ -374,10 +449,12 @@ public class MainActivity extends AppCompatActivity {
                         bitmap = BitmapFactory.decodeStream(is);
                         //将更改主界面的消息发送给主线程
                         Message msg = new Message();
-                        msg.what = 2;
+                        //msg.what = 1;
                         msg.obj = bitmap;
-                        handler.sendMessage(msg);
+                        getPucturehandler.sendMessage(msg);
+                        Log.d("getPicture", "true");
                     } else {
+                        Log.d("getPicture", "FW");
                         //返回码不等于200 请求服务器失败
                         //Message msg = new Message();
                         //msg.what = 3;
@@ -385,12 +462,44 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
+                    Log.d("picture-e1:",e.toString());
                 } catch (IOException e) {
                     e.printStackTrace();
+                    Log.d("picture-e2:",e.toString());
                 }
                 conn.disconnect();
             }
         }.start();
 
     }
+
+    private void asyncGet(String path) {
+        client = new OkHttpClient();
+        final Request request = new Request.Builder().get()
+                .url(path)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                Message message = handler.obtainMessage();
+                if (response.isSuccessful()) {
+                    message.what = 12;
+                    message.obj = response.body().bytes();
+                    getPucturehandler.sendMessage(message);
+                } else {
+                    getPucturehandler.sendEmptyMessage(0);
+                }
+            }
+        });
+    }
+
+
 }

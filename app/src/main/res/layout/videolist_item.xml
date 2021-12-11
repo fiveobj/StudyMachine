@@ -4,12 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
-<com.example.studymachine.view.RoundRectImageView
+<ImageView
     android:id="@+id/video_ima"
     android:layout_width="wrap_content"
     android:layout_height="167dp"
     android:layout_centerHorizontal="true"
-    android:scaleType="centerCrop"/>
+    android:scaleType="fitXY"/>
 
     <TextView
         android:id="@+id/video_name"

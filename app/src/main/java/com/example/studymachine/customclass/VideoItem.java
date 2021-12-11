@@ -1,16 +1,28 @@
 package com.example.studymachine.customclass;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.example.studymachine.R;
 import com.example.studymachine.tool.SerializableBitmap;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 
 public class VideoItem implements Parcelable {
@@ -20,17 +32,34 @@ public class VideoItem implements Parcelable {
     private Bitmap image;
     private String url;
     private String status;
+    private String url_img;
+
+    private Handler handler=new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            switch (msg.what)
+            {
+                case 1:
+                    Looper.prepare();
+                    image=(Bitmap) msg.obj;
+                    Looper.loop();
+            }
+            return false;
+        }
+    });
 
     public VideoItem(){
 
     }
 
-    public VideoItem(String name,String intro,String url,String status){
+    public VideoItem(String name,String intro,String url,String status,String url_img){
         this.intro=intro;
         this.name=name;
         this.url=url;
         this.status=status;
-        image=getBitmapFormUrl(url);
+        this.url_img=url_img;
+        //getPicture(url_img);
+        //image=getBitmapFormUrl(url);
     }
 
 
@@ -64,6 +93,10 @@ public class VideoItem implements Parcelable {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getUrl_img() {
+        return url_img;
     }
 
     //视频帧作为封面
@@ -137,4 +170,61 @@ public class VideoItem implements Parcelable {
             return new VideoItem[size];
         }
     };
+
+
+    private void getPicture(String path){
+        new Thread(){
+            private HttpURLConnection conn;
+            private Bitmap bitmap;
+
+            @Override
+            public void run() {
+                Looper.prepare();
+                try {
+
+                    //创建URL对象
+                    URL url=new URL(path);
+                    // 根据url 发送 http的请求
+                    conn=(HttpURLConnection) url.openConnection();
+                    // 设置请求的方式
+                    conn.setRequestMethod("GET");
+                    //设置超时时间
+                    conn.setConnectTimeout(5000);
+                    // 得到服务器返回的响应码
+                    int code = conn.getResponseCode();
+                    //请求网络成功后返回码是200
+                    if (code == 200) {
+                        //获取输入流
+                        InputStream is = conn.getInputStream();
+                        //将流转换成Bitmap对象
+                        bitmap = BitmapFactory.decodeStream(is);
+                        //将更改主界面的消息发送给主线程
+                        Message msg = new Message();
+                        msg.what = 1;
+                        msg.obj = bitmap;
+                        handler.sendMessage(msg);
+                        Log.d("getPicture", "true");
+                    } else {
+                        Log.d("getPicture", "FW");
+                        //返回码不等于200 请求服务器失败
+                        //Message msg = new Message();
+                        //msg.what = 3;
+                        //handler.sendMessage(msg);
+                    }
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    Log.d("picture-e1:",e.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.d("picture-e2:",e.toString());
+                }
+                conn.disconnect();
+                Looper.loop();
+            }
+        }.start();
+
+    }
+
+
+
 }
