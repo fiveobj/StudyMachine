@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:textColor="#E2E2E2"
-        android:layout_marginTop="31dp"
+        android:layout_marginTop="11dp"
         android:layout_marginLeft="14dp"
         android:textSize="20sp"
         />
@@ -21,6 +21,6 @@
         android:layout_marginLeft="10dp"
         android:layout_height="20dp"
         android:src="@drawable/lock"
-        android:layout_marginTop="35dp"/>
+        android:layout_marginTop="15dp"/>
 </LinearLayout>
 

@@ -48,7 +48,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
         Bundle bundle=this.getIntent().getExtras();
         list=bundle.getParcelableArrayList("videobundle");
-        onclickitem=bundle.getByte("clickitem");
+        onclickitem=bundle.getInt("clickitem");
         Log.d("videobundle",list.toString());
 
         //initData();
@@ -77,11 +77,8 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
     private void init() {
 
-
-
-
-
         videoPlayer_recyc = findViewById(id.video_player_recyc);
+
 
         VideoPlayerAdapter list_video_adapter = new VideoPlayerAdapter(this, list);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -100,7 +97,11 @@ public class VideoPlayerActivity extends AppCompatActivity {
         //设置LayoutManager和Adapter
         videoPlayer_recyc.setLayoutManager(linearLayoutManager);
         videoPlayer_recyc.setAdapter(list_video_adapter);
+
+        MoveToPosition(linearLayoutManager,videoPlayer_recyc,onclickitem);
+        Log.d("Onitem"," "+onclickitem);
         //设置滑动监听
+
         videoPlayer_recyc.addOnScrollListener(new RecyclerView.OnScrollListener() {
             //第一个可见视图,最后一个可见视图
             int firstVisibleItem, lastVisibleItem;
@@ -110,7 +111,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 super.onScrollStateChanged(recyclerView, newState);
 
 
-                newState=onclickitem;
+                //newState=onclickitem;
 
 
                 //如果newState的状态==RecyclerView.SCROLL_STATE_IDLE;
@@ -178,5 +179,28 @@ public class VideoPlayerActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(new Bundle());
+    }
+
+    /**
+     * RecyclerView 移动到当前位置，
+     *
+     * @param manager   设置RecyclerView对应的manager
+     * @param mRecyclerView  当前的RecyclerView
+     * @param n  要跳转的位置
+     */
+    public static void MoveToPosition(LinearLayoutManager manager, RecyclerView mRecyclerView, int n) {
+
+
+        int firstItem = manager.findFirstVisibleItemPosition();
+        int lastItem = manager.findLastVisibleItemPosition();
+        if (n <= firstItem) {
+            mRecyclerView.scrollToPosition(n);
+        } else if (n <= lastItem) {
+            int top = mRecyclerView.getChildAt(n - firstItem).getTop();
+            mRecyclerView.scrollBy(0, top);
+        } else {
+            mRecyclerView.scrollToPosition(n);
+        }
+
     }
 }

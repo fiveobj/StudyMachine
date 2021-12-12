@@ -1,6 +1,7 @@
 package com.example.studymachine;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,7 +17,12 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.studymachine.adapter.VideoAdapter;
 import com.example.studymachine.adapter.VideoNameAdapter;
@@ -60,38 +66,29 @@ public class MainActivity extends AppCompatActivity {
     private Context context;
     private String res;
     private String url,title,intro,status;
+    private AlertDialog alertDialog;
+    private EditText search;
 
 
     private Handler getPucturehandler;
 
     private OkHttpClient client;
 
+    private LayoutAnimationController controller;
+
     private Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
             switch (msg.what) {
                 case 1:
-                    //MainActivity.this.res=msg.obj.toString();
                     Log.d("handler", msg.obj.toString());
                     dataList=(ArrayList<VideoItem>) msg.obj;
-
+                    //动画
+                    //controller=new LayoutAnimationController(AnimationUtils.loadAnimation(context,R.anim.animate));
+                    //VideoList.setLayoutAnimation(controller);
                     videoAdapter = new VideoAdapter(context, (ArrayList<VideoItem>) msg.obj);
                     VideoList.setLayoutManager(gridLayoutManager);
                     VideoList.setAdapter(videoAdapter);
-                    //handlerdata(msg.obj.toString());
-
-                    /*datalist1=(List<Map<String, Object>>) msg.obj;
-                    Log.d("datalist1", datalist1.toString());
-                    for(int i=0;i<datalist1.size();i++){
-                        //getPicture(datalist1.get(i).get("url_img").toString());
-
-
-                    }*/
-                case 2:
-                    //text.setImageBitmap((Bitmap) msg.obj);
-                    //Log.d("getpicture-handler:", msg.obj.toString());
-
-
 
             }
             return false;
@@ -99,23 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
     });
 
-    private Handler handler2=new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(@NonNull Message msg) {
-            switch (msg.what){
-                case 1:
-                    Map<String,Object> map=new HashMap<>();
-                    map.put("image",msg.obj);
-                    Log.d("getpicture-handler:", msg.obj.toString());
 
-
-            }
-            return false;
-        }
-    });
-
-    private final String mp4_a = "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4";//玩具总动员
-    private final String mp4_b = "http://vfx.mtime.cn/Video/2019/03/13/mp4/190313094901111138.mp4";  //抓小偷
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,11 +108,8 @@ public class MainActivity extends AppCompatActivity {
         getVideotype();
         Log.d("VideoName-", VideoName.toString());
 
-
         recognitionVideoType();
         getVideo("红色文化");
-        //initData();
-
 
         gridLayoutManager = new GridLayoutManager(this, 3);
 
@@ -141,15 +119,72 @@ public class MainActivity extends AppCompatActivity {
         VideoNameList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if(VideoNamePayStatus.get(position).equals("0")){
+                    alertDialog=new AlertDialog.Builder(context,R.style.AlertDialog).create();
+                    View view1=View.inflate(MainActivity.this,R.layout.dialog_pay,null);
+                    final ImageView close=(ImageView) view1.findViewById(R.id.dialog_pay_close);
+                    final TextView textView1=(TextView) view1.findViewById(R.id.dialog_pay_text1);
+                    final TextView textView2=(TextView) view1.findViewById(R.id.dialog_pay_text2);
+                    final TextView textViewyes=(TextView) view1.findViewById(R.id.dialog_pay_textyes);
+                    final TextView textViewno=(TextView) view1.findViewById(R.id.dialog_pay_textno);
+                    final ImageView pay_yes=(ImageView) view1.findViewById(R.id.dialog_pay_yes);
+                    final ImageView pay_no=(ImageView) view1.findViewById(R.id.dialog_pay_no);
+                    final Boolean[] issure = {false};
+                    alertDialog.setView(view1,0,0,0,0);
+                    textView1.setText("此栏目内容需要付费观看");
+                    textView2.setText("是否购买？");
+                    alertDialog.show();
+
+                    close.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            alertDialog.dismiss();
+                        }
+                    });
+
+                    pay_yes.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (issure[0]==false)
+                            {
+                                issure[0] =true;
+                                textViewyes.setText("确认");
+                                textViewno.setText("取消");
+                                textView1.setText("消息已发送至家长端，完成支付后可观看");
+                                textView2.setVisibility(View.GONE);
+                            }
+                            else {
+                                alertDialog.dismiss();
+                            }
+                        }
+                    });
+
+                    pay_no.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            alertDialog.dismiss();
+                        }
+                    });
+                }
+                else
+                {
+                    getVideo(VideoName.get(position));
+                    NameAdapter.notifyDataSetChanged();
+                }
                 Log.i("test", "点击了" + position);
                 NameAdapter.setSelectItem(position);
                 Log.d("position.name", VideoName.get(position));
-                getVideo(VideoName.get(position));
-                NameAdapter.notifyDataSetChanged();
+
             }
         });
 
 
+        search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
     private void init() {
@@ -158,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
         videoAdapter = new VideoAdapter(context, dataList);
         VideoList.setLayoutManager(gridLayoutManager);
         VideoList.setAdapter(videoAdapter);
+        search=(EditText) findViewById(R.id.video_search);
 
 
     }
@@ -217,14 +253,7 @@ public class MainActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
 
     }
-    //视频数据
-    /*private void initData(){
-        dataList=new ArrayList<>();
-        for(int i=0;i<10;i++){
-            VideoItem videoItem=new VideoItem("1"+i,"1"+i,mp4_a);
-            dataList.add(videoItem);
-        }
-    }*/
+
 
     //获取视频类别
     private void getVideotype() {
@@ -267,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    //识别视频类型
+    //搜索视频
     private void recognitionVideoType() {
         new Thread(new Runnable() {
             @Override
@@ -307,39 +336,15 @@ public class MainActivity extends AppCompatActivity {
                                     String status=jsonObject1.optString("status");
                                     String url_img=jsonObject1.optString("coverUrl");
                                     Map<String,Object> map=new HashMap<>();
-                                    map.put("url",url);
-                                    map.put("title",title);
-                                    map.put("intro",intro);
-                                    map.put("status",status);
-                                    map.put("url_img",url_img);
-                                    //asyncGet(url_img);
-                                    getPucturehandler=new Handler(new Handler.Callback() {
-                                        @Override
-                                        public boolean handleMessage(@NonNull Message msg) {
-                                            switch (msg.what)
-                                            {
-                                                case 12:
-                                                    byte[] bytes=(byte[])msg.obj;
-                                                    Bitmap bitmap=BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-                                                    map.put("image",bitmap);
-                                                    Log.d("image_handler",msg.obj.toString());
-                                            }
 
-                                            return false;
-                                        }
-                                    });
-                                    //Bitmap image=getPicture(url_img);
-                                    //getPicture(url_img);
                                     VideoItem videoItem=new VideoItem(title,intro,url,status,url_img);
                                     data.add(videoItem);
-                                    //Log.d("map+Bitmap",map.toString());
-                                    //list_map.add(map);
+
                                 }
                             }
                             Message message = new Message();
                             message.what = 1;
                             message.obj = data;
-                            //message.obj=list_map;
                             handler.sendMessage(message);
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -353,152 +358,9 @@ public class MainActivity extends AppCompatActivity {
 
                 result[0] = tools.getViode(typename);
 
-                //Log.d("getViode", res);
-                /*try {
-                    dataList.clear();
-                    JSONObject jsonObjectdata = new JSONObject(result[0]);
-                    String data = jsonObjectdata.getString("data");
-                    JSONArray jsonObject = new JSONArray(data);
-                    Log.d("data", jsonObject.toString());
-                    for (int i = 0; i < jsonObject.length(); i++) {
-                        JSONObject jsonObject1 = jsonObject.getJSONObject(i);
-                        if (jsonObject1 != null) {
-                            url = jsonObject1.optString("videoUrl");
-                            title = jsonObject1.optString("title");
-                            intro = jsonObject1.optString("introduce");
-                            status = jsonObject1.optString("status");
-                            VideoItem videoItem = new VideoItem(title, intro, url, status);
-                            dataList.add(videoItem);
-                            Log.d("videoUrl", url);
-                        }
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                videoAdapter = new VideoAdapter(context, dataList);
-                                VideoList.setLayoutManager(gridLayoutManager);
-                                VideoList.setAdapter(videoAdapter);
-                            }
-                        });
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.d("play_rtsp2", e.toString());
-                }*/
-
                 Looper.loop();
             }
         }).start();
-    }
-
-    private void handlerdata(String s) {
-        try {
-            dataList.clear();
-            JSONObject jsonObjectdata = new JSONObject(s);
-            String data = jsonObjectdata.getString("data");
-            JSONArray jsonObject = new JSONArray(data);
-            Log.d("data", jsonObject.toString());
-            for (int i = 0; i < jsonObject.length(); i++) {
-                JSONObject jsonObject1 = jsonObject.getJSONObject(i);
-                if (jsonObject1 != null) {
-                    url = jsonObject1.optString("videoUrl");
-                    title = jsonObject1.optString("title");
-                    intro = jsonObject1.optString("introduce");
-                    status = jsonObject1.optString("status");
-
-                    VideoItem videoItem = new VideoItem(title, intro, url, status,"1");
-                    dataList.add(videoItem);
-                    Log.d("videoUrl", url);
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        videoAdapter = new VideoAdapter(context, dataList);
-        VideoList.setLayoutManager(gridLayoutManager);
-        VideoList.setAdapter(videoAdapter);
-
-
-    }
-
-
-    private void getPicture(String path){
-        new Thread(){
-            private HttpURLConnection conn;
-            private Bitmap bitmap;
-
-            @Override
-            public void run() {
-                try {
-                    //创建URL对象
-                    URL url=new URL(path);
-                    // 根据url 发送 http的请求
-                    conn=(HttpURLConnection) url.openConnection();
-                    // 设置请求的方式
-                    conn.setRequestMethod("GET");
-                    //设置超时时间
-                    conn.setConnectTimeout(5000);
-                    // 得到服务器返回的响应码
-                    int code = conn.getResponseCode();
-                    //请求网络成功后返回码是200
-                    if (code == 200) {
-                        //获取输入流
-                        InputStream is = conn.getInputStream();
-                        //将流转换成Bitmap对象
-                        bitmap = BitmapFactory.decodeStream(is);
-                        //将更改主界面的消息发送给主线程
-                        Message msg = new Message();
-                        //msg.what = 1;
-                        msg.obj = bitmap;
-                        getPucturehandler.sendMessage(msg);
-                        Log.d("getPicture", "true");
-                    } else {
-                        Log.d("getPicture", "FW");
-                        //返回码不等于200 请求服务器失败
-                        //Message msg = new Message();
-                        //msg.what = 3;
-                        //handler.sendMessage(msg);
-                    }
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                    Log.d("picture-e1:",e.toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.d("picture-e2:",e.toString());
-                }
-                conn.disconnect();
-            }
-        }.start();
-
-    }
-
-    private void asyncGet(String path) {
-        client = new OkHttpClient();
-        final Request request = new Request.Builder().get()
-                .url(path)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-
-                Message message = handler.obtainMessage();
-                if (response.isSuccessful()) {
-                    message.what = 12;
-                    message.obj = response.body().bytes();
-                    getPucturehandler.sendMessage(message);
-                } else {
-                    getPucturehandler.sendEmptyMessage(0);
-                }
-            }
-        });
     }
 
 

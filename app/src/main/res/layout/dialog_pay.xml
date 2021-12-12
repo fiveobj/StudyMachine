@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="210dp">
+
+    <ImageView
+        android:layout_width="335dp"
+        android:layout_height="210dp"
+        android:layout_centerInParent="true"
+        android:src="@mipmap/pay_back" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="154dp"
+        >
+        <ImageView
+            android:id="@+id/dialog_pay_yes"
+            android:layout_width="74dp"
+            android:layout_height="43dp"
+            android:src="@mipmap/pay_yesback"
+            />
+
+        <ImageView
+            android:id="@+id/dialog_pay_no"
+            android:layout_width="74dp"
+            android:layout_height="43dp"
+            android:src="@mipmap/pay_noback"
+            android:layout_marginLeft="132dp"
+            />
+
+        <RelativeLayout
+            android:layout_width="74dp"
+            android:layout_height="43dp"
+            >
+            <TextView
+                android:id="@+id/dialog_pay_textyes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="是"
+                android:textColor="@color/white"
+                android:textSize="24sp"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="74dp"
+            android:layout_height="43dp"
+            android:layout_marginLeft="132dp"
+            >
+            <TextView
+                android:id="@+id/dialog_pay_textno"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:textColor="#727272"
+                android:text="否"
+                android:textSize="24sp"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+
+    <ImageView
+        android:id="@+id/dialog_pay_close"
+        android:layout_width="35dp"
+        android:layout_height="33dp"
+        android:src="@mipmap/pay_close"
+        android:layout_marginTop="6dp"
+        android:layout_marginLeft="294dp"
+        />
+    
+    <TextView
+        android:id="@+id/dialog_pay_text1"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="65dp"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/white"
+        android:textSize="24sp"/>
+
+    <TextView
+        android:id="@+id/dialog_pay_text2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/white"
+        android:textSize="24sp"/>
+
+
+
+
+
+
+
+</RelativeLayout>

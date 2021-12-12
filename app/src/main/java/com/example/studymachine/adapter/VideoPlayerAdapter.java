@@ -104,7 +104,7 @@ public class VideoPlayerAdapter  extends RecyclerView.Adapter<RecyclerView.ViewH
         });*/
         //实现第一个视频自动播放
         if(position==0){
-            vh.standardGSYVideoPlayer.startPlayLogic();
+            //vh.standardGSYVideoPlayer.startPlayLogic();
         }
 
     }
