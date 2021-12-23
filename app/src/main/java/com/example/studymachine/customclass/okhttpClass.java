@@ -94,7 +94,7 @@ public String getViodeType(){
 
     public String searchVideo(String keyword){
         FormBody.Builder builder=new FormBody.Builder();
-        RequestBody requestBody=builder.add("keyword",keyword).build();
+        RequestBody requestBody=builder.add("keyword",keyword).add("sID","1").build();
         Request request=new Request.Builder().url("http://192.168.31.95:8080/video/getVideoByKeyword").post(requestBody).build();
         try (Response response=okHttpClient.newCall(request).execute()){
             if(response.isSuccessful()){

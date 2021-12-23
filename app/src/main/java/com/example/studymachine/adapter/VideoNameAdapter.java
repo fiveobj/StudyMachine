@@ -3,6 +3,7 @@ package com.example.studymachine.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ public class VideoNameAdapter extends BaseAdapter {
     private Context context;
     private List<Map<String, Object>> list;
     private int selectItem = -1;
+    private int posi=-1;
 
     public VideoNameAdapter(Context context, List<Map<String, Object>> maps) {
         this.context = context;
@@ -49,10 +51,15 @@ public class VideoNameAdapter extends BaseAdapter {
         this.selectItem = selectItem;
     }
 
+    public int getposi(){return posi;}
+
+
     @SuppressLint("ResourceAsColor")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // TODO Auto-generated method stub
+        posi=selectItem;
+        Log.d("videoadapter.getposi-1", ""+selectItem);
         ViewHolder viewHolder = null;
         if (convertView == null && list.size() != 0) {
             viewHolder = new ViewHolder();

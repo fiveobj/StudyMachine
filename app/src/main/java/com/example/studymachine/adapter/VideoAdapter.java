@@ -101,6 +101,10 @@ public class VideoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 Intent intent=new Intent(context, VideoPlayerActivity.class);
 
                 intent.putParcelableArrayListExtra("videobundle", list);
+                for(int i=0;i<list.size();i++) {
+                    System.out.println(list.get(i).getUrl());
+                    System.out.println(list.get(i).getName());
+                }
                 intent.putExtra("clickitem",position);
                 Log.d("Onitem-0"," "+position);
                 Log.d("videobundle-put",list.get(0).toString());

@@ -4,7 +4,6 @@ import static com.example.studymachine.R.*;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
@@ -20,13 +18,10 @@ import android.view.WindowManager;
 import com.example.studymachine.adapter.VideoPlayerAdapter;
 import com.example.studymachine.customclass.ScrollCalculatorHelper;
 import com.example.studymachine.customclass.VideoItem;
-import com.example.studymachine.customclass.Video_Bean;
 import com.example.studymachine.tool.DpTools;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class VideoPlayerActivity extends AppCompatActivity {
 

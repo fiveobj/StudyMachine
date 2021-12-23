@@ -6,17 +6,17 @@
     android:layout_height="match_parent"
     tools:ignore="MissingDefaultResource"
     android:orientation="vertical"
-    android:background="#80C5FF">
+    android:background="#000000">
 
     <ImageButton
+        android:id="@+id/back"
         android:layout_width="28.13dp"
         android:layout_height="38.52dp"
-        android:layout_marginTop="21dp"
         android:layout_marginLeft="38dp"
-        android:src="@drawable/back"
-        android:scaleType="fitXY"
+        android:layout_marginTop="21dp"
         android:background="#00FFFFFF"
-        />
+        android:scaleType="fitXY"
+        android:src="@drawable/back" />
 
     <ImageView
         android:layout_width="52dp"
@@ -24,38 +24,56 @@
         android:src="@drawable/iocn"
         android:layout_marginLeft="79dp"
         android:layout_marginTop="15dp"/>
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="41dp"
-        android:layout_marginTop="25dp">
-
-        <ImageView
-            android:layout_width="260dp"
-            android:layout_height="33dp"
-            android:src="@drawable/search" />
-
-        <EditText
-            android:id="@+id/video_search"
-            android:layout_width="200dp"
-            android:layout_height="25dp"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="43dp"
-            android:background="#00FFFFFF" />
-    </RelativeLayout>
 
     <com.example.studymachine.view.HorizonTalListView
         android:id="@+id/videoname_list"
-        android:layout_width="580dp"
+        android:layout_width="570dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="143dp"
         android:layout_marginTop="15dp" />
+
+
+    <RelativeLayout
+        android:id="@+id/video_search_layout"
+        android:layout_width="260dp"
+        android:layout_height="33dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="41dp"
+        android:layout_marginTop="25dp"
+        android:background="@drawable/search_back">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp">
+            <ImageView
+                android:id="@+id/search_image"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@mipmap/search"
+                android:layout_gravity="center"/>
+
+            <EditText
+                android:id="@+id/video_search"
+                android:layout_width="200dp"
+                android:layout_height="25dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="20dp"
+                android:background="#00FFFFFF"
+                android:imeOptions="actionGo"/>
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="84dp"
-        >
+        android:layout_marginTop="84dp">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -66,10 +84,9 @@
                 android:id="@+id/video_recyc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:columnCount="3"
-                android:rowCount="5"
                 android:layout_centerHorizontal="true"
-                >
+                android:columnCount="3"
+                android:rowCount="5">
 
             </androidx.recyclerview.widget.RecyclerView>
 

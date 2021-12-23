@@ -6,22 +6,32 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.studymachine.adapter.VideoAdapter;
@@ -67,7 +77,15 @@ public class MainActivity extends AppCompatActivity {
     private String res;
     private String url,title,intro,status;
     private AlertDialog alertDialog;
+    private ImageButton back;
+
+
+    //搜索
+    private ImageView search_image;
     private EditText search;
+    private RelativeLayout search_layout;
+    private AutoTransition autoTransition;
+    private Boolean isSearch=false;
 
 
     private Handler getPucturehandler;
@@ -81,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         public boolean handleMessage(@NonNull Message msg) {
             switch (msg.what) {
                 case 1:
-                    Log.d("handler", msg.obj.toString());
+                    Log.d("handler-1", msg.obj.toString());
                     dataList=(ArrayList<VideoItem>) msg.obj;
                     //动画
                     //controller=new LayoutAnimationController(AnimationUtils.loadAnimation(context,R.anim.animate));
@@ -89,6 +107,16 @@ public class MainActivity extends AppCompatActivity {
                     videoAdapter = new VideoAdapter(context, (ArrayList<VideoItem>) msg.obj);
                     VideoList.setLayoutManager(gridLayoutManager);
                     VideoList.setAdapter(videoAdapter);
+                case 2:
+                    Log.d("handler-2", msg.obj.toString());
+                    dataList=(ArrayList<VideoItem>) msg.obj;
+                    //动画
+                    //controller=new LayoutAnimationController(AnimationUtils.loadAnimation(context,R.anim.animate));
+                    //VideoList.setLayoutAnimation(controller);
+                    videoAdapter = new VideoAdapter(context, (ArrayList<VideoItem>) msg.obj);
+                    VideoList.setLayoutManager(gridLayoutManager);
+                    VideoList.setAdapter(videoAdapter);
+
 
             }
             return false;
@@ -108,13 +136,11 @@ public class MainActivity extends AppCompatActivity {
         getVideotype();
         Log.d("VideoName-", VideoName.toString());
 
-        recognitionVideoType();
         getVideo("红色文化");
 
         gridLayoutManager = new GridLayoutManager(this, 3);
-
-
         VideoList.addItemDecoration(new SpaceItemDecoration(10, 20));
+
 
         VideoNameList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -169,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
                 else
                 {
                     getVideo(VideoName.get(position));
+                    Log.d("videoadapter.getposi", ""+NameAdapter.getposi());
                     NameAdapter.notifyDataSetChanged();
                 }
                 Log.i("test", "点击了" + position);
@@ -179,10 +206,52 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        search.setOnClickListener(new View.OnClickListener() {
+       //搜索
+
+        search.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                RelativeLayout.LayoutParams layoutParams=(RelativeLayout.LayoutParams) search_layout.getLayoutParams();
+                layoutParams.width=dip2px(470);
+                layoutParams.setMargins(dip2px(0),dip2px(25),dip2px(41),dip2px(0));
+                search_layout.setLayoutParams(layoutParams);
+                VideoNameList.setVisibility(View.GONE);
+                isSearch=true;
+                //开始动画
+                beginDelayedTransition(search_layout);
+                return false;
+            }
+        });
+
+        search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                searchVideo(search.getText().toString());
+                Log.d("search onclick", "true");
+                return true;
+            }
+        });
+
+        back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(isSearch)
+                {
+                    RelativeLayout.LayoutParams layoutParams=(RelativeLayout.LayoutParams) search_layout.getLayoutParams();
+                    layoutParams.width=dip2px(260);
+                    layoutParams.setMargins(dip2px(0),dip2px(25),dip2px(41),dip2px(0));
+                    search_layout.setLayoutParams(layoutParams);
 
+
+                    isSearch=false;
+                    //开始动画
+                    beginDelayedTransition(search_layout);
+                    search.setText(" ");
+                    VideoNameList.setVisibility(View.VISIBLE);
+                    getVideo(VideoName.get(NameAdapter.getposi()));
+                    Log.d("videoadapter.getposi", ""+NameAdapter.getposi());
+
+                }
             }
         });
     }
@@ -194,9 +263,13 @@ public class MainActivity extends AppCompatActivity {
         VideoList.setLayoutManager(gridLayoutManager);
         VideoList.setAdapter(videoAdapter);
         search=(EditText) findViewById(R.id.video_search);
-
+        search_image=(ImageView) findViewById(R.id.search_image);
+        search_layout=(RelativeLayout) findViewById(R.id.video_search_layout);
+        back=(ImageButton) findViewById(R.id.back);
 
     }
+
+
 
     //视频类型
     private List<Map<String, Object>> getName() {
@@ -274,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
                         if (videonameitem != null) {
 
                             name = videonameitem.optString("typeName");
-                            payState=videonameitem.optString("payState");
+                            payState=videonameitem.optString("isFree");
                             VideoNamePayStatus.add(payState);
                             VideoName.add(name);
                             Log.d("name", name);
@@ -297,13 +370,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //搜索视频
-    private void recognitionVideoType() {
+    private void searchVideo(String keyword) {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                Looper.prepare();
                 okhttpClass tools = new okhttpClass();
-                String result = tools.searchVideo("红色文化");
+                String result = tools.searchVideo(keyword);
                 Log.d("searchVideo", result);
+                String title = null;
+                String intro=null;
+                String videoUrl=null;
+                String coverUrl=null;
+                String status=null;
+                try {
+                    ArrayList<VideoItem> data=new ArrayList<>();
+                    JSONObject jsonObject = new JSONObject(result);
+                    String VideoNames = jsonObject.getString("data");
+                    JSONArray VideoNamearrray = new JSONArray(VideoNames);
+                    for (int i = 0; i < VideoNamearrray.length(); i++) {
+                        JSONObject videonameitem = VideoNamearrray.getJSONObject(i);
+                        if (videonameitem != null) {
+                            title = videonameitem.optString("title");
+                            intro=videonameitem.optString("introduce");
+                            videoUrl=videonameitem.optString("videoUrl");
+                            coverUrl=videonameitem.optString("coverUrl");
+                            status=videonameitem.optString("status");
+                            VideoItem videoItem=new VideoItem(title,intro,videoUrl,status,coverUrl);
+                            data.add(videoItem);
+                        }
+                    }
+                    Message message = new Message();
+                    message.what = 2;
+                    message.obj = data;
+                    handler.sendMessage(message);
+                    Log.d("videoname", VideoName.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Looper.loop();
             }
         }).start();
     }
@@ -363,5 +468,16 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void beginDelayedTransition(ViewGroup view) {
+        autoTransition = new AutoTransition();
+        autoTransition.setDuration(500);
+        TransitionManager.beginDelayedTransition(view, autoTransition);
+    }
+
+    private int dip2px(float dpVale) {
+        final float scale = getResources().getDisplayMetrics().density;
+        return (int) (dpVale * scale + 0.5f);
+    }
 
 }
